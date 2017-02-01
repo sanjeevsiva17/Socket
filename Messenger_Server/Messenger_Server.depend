@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1485960690 source:/media/sanjeev/New Volume/source/C/Messenger/Server/Messenger_Server/main.c
+	<stdio.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<netinet/in.h>
+
