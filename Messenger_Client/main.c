@@ -9,6 +9,10 @@ Date : 1/2/2017
 #include<sys/socket.h>
 #include<netinet/in.h>
 #include<netdb.h>
+#include<stdlib.h>
+#include<strings.h>
+#include<string.h>
+#include<sys/uio.h>
 void error_msg(char *msg)
 {
     perror(msg);
@@ -51,9 +55,9 @@ int main(int argc, char *argv[])  //argc and argv to pass IP address and port nu
     bzero((char*)&serv_Addr,sizeof(serv_Addr)); //server addresses as zero
 
     serv_Addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr_list,(char *)&serv_Addr.sin_addr.s_addr,server->h_length);
+    bcopy((char *)server->h_addr_list[0],(char *)&serv_Addr.sin_addr,server->h_length);
     serv_Addr.sin_port = htons(portno);
-    if(connect(sockfd,&serv_Addr,sizeof(serv_Addr))<0)
+    if(connect(sockfd,(struct sockaddr*)&serv_Addr,sizeof(serv_Addr))<0)
     {
         error_msg("Error Connecting");
     }
@@ -61,14 +65,18 @@ int main(int argc, char *argv[])  //argc and argv to pass IP address and port nu
     bzero(buffer,256); // making message empty
     printf("Please Enter message");
     fgets(buffer,255,stdin);
-    n = writev(sockfd,buffer,strlen(buffer));
+    struct iovec buffer_info;
+    buffer_info.iov_base = buffer;
+    buffer_info.iov_len = strlen(buffer);
+    n = writev(sockfd,&buffer_info,1);
      if(n<0)
     {
         error_msg("Error reading from socket");
     }
       bzero(buffer,256); // making message empty
 
-    n = readv(sockfd,buffer,255);  //reading the message
+    buffer_info.iov_len = 255;
+    n = readv(sockfd,&buffer_info,1);  //reading the message
 
     if(n<0)
     {
