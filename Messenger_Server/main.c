@@ -9,6 +9,10 @@ Date : 1/2/2017
 #include<sys/socket.h>
 #include<netinet/in.h>
 #include<netdb.h>
+#include<stdlib.h>
+#include<strings.h>
+#include<string.h>
+#include<sys/uio.h>
 
 void error_msg(char *msg)
 {
@@ -55,7 +59,8 @@ int main(int argc, char *argv[])  //argc and argv to pass IP address and port nu
     listen(sockfd,10); //a server can handle 10 clients now
     clilen = sizeof(cli_Addr);
 
-    newsockfd = accept(sockfd,(struct sockaddr *)&cli_Addr, sizeof(cli_Addr));
+    socklen_t socket_length = sizeof(cli_Addr);
+    newsockfd = accept(sockfd,(struct sockaddr *)&cli_Addr, &socket_length);
 
     if(newsockfd<0)
     {
@@ -64,7 +69,10 @@ int main(int argc, char *argv[])  //argc and argv to pass IP address and port nu
 
     bzero(buffer,256); // making message empty
 
-    n = readv(newsockfd,buffer,255);  //reading the message
+    struct iovec buffer_info;
+    buffer_info.iov_base = buffer;
+    buffer_info.iov_len = 255;
+    n = readv(newsockfd,&buffer_info,1);  //reading the message
 
     if(n<0)
     {
@@ -76,7 +84,8 @@ int main(int argc, char *argv[])  //argc and argv to pass IP address and port nu
     bzero(buffer,256); // making message empty
     printf("Please Enter message");
     fgets(buffer,255,stdin);
-    n = writev(sockfd,buffer,strlen(buffer));//write message
+    buffer_info.iov_len = strlen(buffer);
+    n = writev(sockfd,&buffer_info,1);//write message
 
     if(n<0)
     {
